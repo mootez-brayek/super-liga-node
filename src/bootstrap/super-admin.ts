@@ -10,8 +10,17 @@ export async function bootstrapSuperAdmin() {
   const firstName = process.env.SUPERADMIN_FIRSTNAME;
   const lastName = process.env.SUPERADMIN_LASTNAME;
 
-  if (!email || !username || !password || !firstName || !lastName) {
-    throw new Error('Super admin environment variables are not fully configured');
+  const missing = [
+    !email ? 'SUPERADMIN_EMAIL' : null,
+    !username ? 'SUPERADMIN_USERNAME' : null,
+    !password ? 'SUPERADMIN_PASSWORD' : null,
+    !firstName ? 'SUPERADMIN_FIRSTNAME' : null,
+    !lastName ? 'SUPERADMIN_LASTNAME' : null
+  ].filter((value): value is string => Boolean(value));
+
+  if (missing.length > 0) {
+    throw new Error(`Missing required super admin environment variables: ${missing.join(', ')}`);
+    
   }
 
   const userRepo = AppDataSource.getRepository(User);
