@@ -20,7 +20,6 @@ async function bootstrap() {
   app.listen(port, host, () => {
     // keep startup output minimal but explicit
     console.log(`Node backend listening on ${host}:${port}`);
-
   });
 }
 

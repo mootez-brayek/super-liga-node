@@ -20,7 +20,6 @@ export async function bootstrapSuperAdmin() {
 
   if (missing.length > 0) {
     throw new Error(`Missing required super admin environment variables: ${missing.join(', ')}`);
-    
   }
 
   const userRepo = AppDataSource.getRepository(User);
