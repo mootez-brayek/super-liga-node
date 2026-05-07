@@ -22,7 +22,10 @@ import { registerSwagger } from './swagger';
 export function createApp() {
   const app = express();
 
-  const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:4200';
+  const corsOrigin = (process.env.CORS_ORIGIN || 'http://localhost:4200')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
   const userService = new UserService();
   const teamService = new TeamService();
@@ -31,9 +34,23 @@ export function createApp() {
   const standingService = new StandingService();
   const dashboardService = new DashboardService();
 
+  app.get('/', (_req, res) => {
+    res.status(200).json({
+      message: 'Super Liga Node backend is running',
+      data: { status: 'ok' }
+    });
+  });
+
+  app.get('/health', (_req, res) => {
+    res.status(200).json({
+      message: 'ok',
+      data: { status: 'ok' }
+    });
+  });
+
   app.use(
     cors({
-      origin: corsOrigin,
+      origin: corsOrigin.length === 1 ? corsOrigin[0] : corsOrigin,
       credentials: true
     })
   );

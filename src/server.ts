@@ -15,10 +15,12 @@ async function bootstrap() {
 
   const app = createApp();
   const port = Number(process.env.PORT || 3000);
+  const host = process.env.HOST || '0.0.0.0';
 
-  app.listen(port, () => {
+  app.listen(port, host, () => {
     // keep startup output minimal but explicit
-    console.log(`Node backend listening on port ${port}`);
+    console.log(`Node backend listening on ${host}:${port}`);
+
   });
 }
 
