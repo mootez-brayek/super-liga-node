@@ -7,6 +7,12 @@ async function bootstrap() {
   const { bootstrapSuperAdmin } = await import('./bootstrap/super-admin');
   const { createApp } = await import('./app');
 
+  const dbHost = process.env.DB_HOST ?? 'localhost';
+  const dbPort = Number(process.env.DB_PORT ?? 3306);
+  const dbUser = process.env.DB_USERNAME ?? process.env.DB_USER ?? 'root';
+  const dbName = process.env.DB_DATABASE ?? process.env.DB_NAME ?? 'super_liga';
+  console.log(`Booting with DB host=${dbHost} port=${dbPort} user=${dbUser} database=${dbName}`);
+
   if (!AppDataSource.isInitialized) {
     await AppDataSource.initialize();
   }
