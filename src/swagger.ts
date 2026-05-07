@@ -19,6 +19,15 @@ const errorResponses = {
   500: jsonResponse(ref('ErrorResponse'), 'Internal Server Error')
 };
 
+function getSwaggerServerUrl() {
+  const publicUrl = process.env.PUBLIC_URL?.trim();
+  if (publicUrl) {
+    return publicUrl;
+  }
+
+  return '/';
+}
+
 export const swaggerSpec = {
   openapi: '3.0.3',
   info: {
@@ -28,7 +37,7 @@ export const swaggerSpec = {
   },
   servers: [
     {
-      url: 'http://localhost:3000'
+      url: getSwaggerServerUrl()
     }
   ],
   tags: [
@@ -694,7 +703,7 @@ export const swaggerSpec = {
           ...errorResponses
         }
       }
-    }
+  }
   }
 };
 
