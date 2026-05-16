@@ -203,7 +203,7 @@ export class SeasonService {
 
   private async backfillLegacyRows(activeSeason: Season): Promise<void> {
     await AppDataSource.query('UPDATE matches SET season_id = ? WHERE season_id IS NULL', [activeSeason.seasonId]);
-    await AppDataSource.query('UPDATE standings SET season_id = ? WHERE season_id IS NULL', [activeSeason.seasonId]);
+    await AppDataSource.query('UPDATE standing SET season_id = ? WHERE season_id IS NULL', [activeSeason.seasonId]);
   }
 
   private async ensureStandingsForSeason(season: Season, providedTeams?: Team[]): Promise<void> {
