@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 't
 import { MatchStatus } from './enums';
 import { Team } from './Team';
 import { Player } from './Player';
+import { Season } from './Season';
 
 @Entity({ name: 'matches' })
 export class Match {
@@ -19,6 +20,9 @@ export class Match {
 
   @Column({ type: 'int', nullable: true })
   awayScore!: number | null;
+
+  @Column({ type: 'int', default: 1 })
+  roundNumber!: number;
 
   @Column({ default: 0 })
   homeRed!: number;
@@ -46,4 +50,8 @@ export class Match {
   @ManyToOne(() => Player, { nullable: true })
   @JoinColumn({ name: 'mvp_id' })
   mvp!: Player | null;
+
+  @ManyToOne(() => Season, (season) => season.matches, { nullable: true })
+  @JoinColumn({ name: 'season_id' })
+  season!: Season | null;
 }

@@ -22,3 +22,12 @@ export enum StrongFoot {
   RIGHT = 'RIGHT',
   BOTH = 'BOTH'
 }
+
+export enum MatchEventType {
+  GOAL = 'GOAL',
+  OWN_GOAL = 'OWN_GOAL',
+  YELLOW_CARD = 'YELLOW_CARD',
+  RED_CARD = 'RED_CARD',
+  TWO_MINUTE = 'TWO_MINUTE',
+  OTHER = 'OTHER'
+}

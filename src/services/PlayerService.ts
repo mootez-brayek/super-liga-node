@@ -1,6 +1,7 @@
 import { AppDataSource } from '../data-source';
 import { CreatePlayerRequest } from '../dto/CreatePlayerRequest';
 import { PlayerResponse } from '../dto/PlayerResponse';
+import { UpdatePlayerRequest } from '../dto/UpdatePlayerRequest';
 import { Position, Role } from '../entities/enums';
 import { Player } from '../entities/Player';
 import { Team } from '../entities/Team';
@@ -8,6 +9,7 @@ import { User } from '../entities/User';
 import { CurrentUser } from '../types/express';
 import { calculateAge, normalizeDate } from '../utils/date';
 import { isBlank } from '../utils/string';
+import { deleteUploadedMedia } from '../utils/uploads';
 
 export class PlayerService {
   private playerRepo() {
@@ -57,6 +59,10 @@ export class PlayerService {
       throw new Error('Only Admin of that team can add players to it');
     }
 
+    if (team.isArchived) {
+      throw new Error('Team is archived');
+    }
+
     const exists = await playerRepo.exists({
       where: {
         team: { teamId: team.teamId },
@@ -84,7 +90,7 @@ export class PlayerService {
     return this.mapToResponse(saved);
   }
 
-  async updatePlayer(playerId: number, request: CreatePlayerRequest, currentUser: CurrentUser): Promise<PlayerResponse> {
+  async updatePlayer(playerId: number, request: UpdatePlayerRequest, currentUser: CurrentUser): Promise<PlayerResponse> {
     if (currentUser.role !== Role.ADMIN) {
       throw new Error('Only ADMIN can update players');
     }
@@ -114,6 +120,10 @@ export class PlayerService {
       throw new Error('You can only update your team players');
     }
 
+    if (admin.team.isArchived) {
+      throw new Error('Team is archived');
+    }
+
     if (!isBlank(request.firstName)) {
       player.firstName = request.firstName!.trim();
     }
@@ -139,8 +149,10 @@ export class PlayerService {
       player.number = request.number;
     }
 
-    if (!isBlank(request.picture)) {
-      player.picture = request.picture!.trim();
+    const previousPicture = player.picture;
+
+    if (request.picture !== undefined) {
+      player.picture = request.picture?.trim() ? request.picture.trim() : null;
     }
 
     if (request.strongFoot != null) {
@@ -155,25 +167,78 @@ export class PlayerService {
       player.position = request.position;
     }
 
+    if (request.teamId != null && request.teamId !== player.team.teamId) {
+      throw new Error('You can only update your team players');
+    }
+
     const saved = await playerRepo.save(player);
+
+    if (saved.picture !== previousPicture) {
+      deleteUploadedMedia(previousPicture);
+    }
+
     return this.mapToResponse(saved);
   }
 
-  async togglePlayerStatus(playerId: number): Promise<void> {
+  async togglePlayerStatus(playerId: number, currentUser: CurrentUser): Promise<void> {
     const playerRepo = this.playerRepo();
-    const player = await playerRepo.findOne({ where: { playerId }, relations: ['team'] });
+    const player = await playerRepo.findOne({ where: { playerId }, relations: ['team', 'team.admin'] });
 
     if (!player) {
       throw new Error('Player not found');
+    }
+
+    if (currentUser.role !== Role.ADMIN || !player.team.admin || player.team.admin.userId !== currentUser.userId) {
+      throw new Error('You can only update your team players');
     }
 
     player.active = !player.active;
     await playerRepo.save(player);
   }
 
-  async getPlayerByTeam(teamId: number): Promise<PlayerResponse[]> {
+  async archivePlayer(playerId: number, currentUser: CurrentUser): Promise<void> {
+    const playerRepo = this.playerRepo();
+    const player = await playerRepo.findOne({ where: { playerId }, relations: ['team', 'team.admin'] });
+
+    if (!player) {
+      throw new Error('Player not found');
+    }
+
+    if (currentUser.role !== Role.ADMIN || !player.team.admin || player.team.admin.userId !== currentUser.userId) {
+      throw new Error('You can only update your team players');
+    }
+
+    if (!player.active) {
+      return;
+    }
+
+    player.active = false;
+    await playerRepo.save(player);
+  }
+
+  async restorePlayer(playerId: number, currentUser: CurrentUser): Promise<void> {
+    const playerRepo = this.playerRepo();
+    const player = await playerRepo.findOne({ where: { playerId }, relations: ['team', 'team.admin'] });
+
+    if (!player) {
+      throw new Error('Player not found');
+    }
+
+    if (currentUser.role !== Role.ADMIN || !player.team.admin || player.team.admin.userId !== currentUser.userId) {
+      throw new Error('You can only update your team players');
+    }
+
+    if (player.active) {
+      return;
+    }
+
+    player.active = true;
+    await playerRepo.save(player);
+  }
+
+  async getPlayerByTeam(teamId: number, includeInactive = false): Promise<PlayerResponse[]> {
     const players = await this.playerRepo().find({
-      where: { team: { teamId } },
+      where: includeInactive ? { team: { teamId } } : { team: { teamId }, active: true },
       relations: ['team']
     });
 
@@ -185,6 +250,8 @@ export class PlayerService {
       playerId: player.playerId,
       fullName: `${player.firstName} ${player.lastName}`,
       number: player.number,
+      picture: player.picture ?? null,
+      active: player.active,
       strongFoot: player.strongFoot,
       birthDate: player.birthDate ?? null,
       age: calculateAge(player.birthDate),

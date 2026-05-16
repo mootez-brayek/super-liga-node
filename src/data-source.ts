@@ -5,6 +5,8 @@ import { Team } from './entities/Team';
 import { Player } from './entities/Player';
 import { Match } from './entities/Match';
 import { Standing } from './entities/Standing';
+import { Season } from './entities/Season';
+import { MatchEvent } from './entities/MatchEvent';
 
 function resolveEnvAlias(
   primary: string | undefined,
@@ -33,7 +35,7 @@ export const AppDataSource = new DataSource({
   username: dbUsername,
   password: dbPassword,
   database: dbName,
-  entities: [User, Team, Player, Match, Standing],
+  entities: [User, Team, Player, Season, Match, Standing, MatchEvent],
   synchronize: process.env.DB_SYNCHRONIZE !== 'false',
   logging: process.env.DB_LOGGING === 'true'
 });

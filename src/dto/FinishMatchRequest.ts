@@ -6,4 +6,6 @@ export interface FinishMatchRequest {
   homeOut: number | null;
   awayOut: number | null;
   mvpId: number | null;
+  homeScorerIds?: number[] | null;
+  awayScorerIds?: number[] | null;
 }

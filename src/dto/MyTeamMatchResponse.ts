@@ -10,4 +10,6 @@ export interface MyTeamMatchResponse {
   matchTime: string | null;
   status: MatchStatus | null;
   result: string | null;
+  seasonName: string | null;
+  roundNumber: number;
 }

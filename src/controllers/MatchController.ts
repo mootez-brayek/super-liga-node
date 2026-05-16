@@ -29,6 +29,38 @@ export function createMatchRouter(matchService: MatchService) {
   );
 
   router.get(
+    '/:matchId/events',
+    requireAuth,
+    requireRole(Role.SuperAdmin),
+    asyncHandler(async (req, res) => {
+      const matchId = parseIdParam(req.params.matchId, 'matchId');
+      res.status(200).json(await matchService.getMatchEvents(matchId));
+    })
+  );
+
+  router.post(
+    '/:matchId/events',
+    requireAuth,
+    requireRole(Role.SuperAdmin),
+    asyncHandler(async (req, res) => {
+      const matchId = parseIdParam(req.params.matchId, 'matchId');
+      res.status(200).json(await matchService.addMatchEvent(matchId, req.body));
+    })
+  );
+
+  router.delete(
+    '/:matchId/events/:eventId',
+    requireAuth,
+    requireRole(Role.SuperAdmin),
+    asyncHandler(async (req, res) => {
+      const matchId = parseIdParam(req.params.matchId, 'matchId');
+      const eventId = parseIdParam(req.params.eventId, 'eventId');
+      await matchService.deleteMatchEvent(matchId, eventId);
+      res.status(200).end();
+    })
+  );
+
+  router.get(
     '/upcoming',
     requireAuth,
     asyncHandler(async (_req, res) => {

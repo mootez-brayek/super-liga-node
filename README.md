@@ -42,6 +42,8 @@ docker compose up --build
 - Do not set conflicting values for both aliases. If you define both, they must match exactly or the app will fail fast.
 - Keep `DB_HOST`/`DB_PORT`/`DB_PASSWORD` set to the production database values from hPanel.
 - Set `CORS_ORIGIN` to your production frontend domain, or to a comma-separated list of allowed origins if needed.
+- The backend also allows local loopback origins and the `www` / non-`www` variant of any configured origin to reduce Angular dev CORS issues.
+- If you want Swagger to show the public API base URL explicitly, set `PUBLIC_URL` to your live domain, for example `https://superligasports.com`. Otherwise Swagger stays relative to the current host via `/`.
 - Keep the `SUPERADMIN_*` variables in the deployment environment, because the app bootstraps the first super-admin user on startup.
 
 ## Hostinger auto-deploy steps
@@ -80,8 +82,8 @@ docker compose up --build
 ## Notes
 
 - MySQL is the default database, matching the Spring project.
-- Swagger UI is available at `http://localhost:3000/api-docs`.
-- Raw OpenAPI JSON is available at `http://localhost:3000/api-docs.json`.
+- Swagger UI is available at `/api-docs` on the deployed domain.
+- Raw OpenAPI JSON is available at `/api-docs.json` on the deployed domain.
 - The API paths mirror the Spring controllers:
   - `/auth/login`
   - `/api/public/*`

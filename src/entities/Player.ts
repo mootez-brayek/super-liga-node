@@ -31,6 +31,9 @@ export class Player {
   @Column({ nullable: true })
   picture!: string | null;
 
+  @Column({ default: true })
+  active!: boolean;
+
   @Column({ type: 'enum', enum: StrongFoot })
   strongFoot!: StrongFoot;
 
@@ -48,9 +51,6 @@ export class Player {
 
   @Column({ default: 0 })
   assists!: number;
-
-  @Column({ default: true })
-  active!: boolean;
 
   @CreateDateColumn({ type: 'datetime' })
   createdAt!: Date;

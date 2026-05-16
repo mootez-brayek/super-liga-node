@@ -11,4 +11,7 @@ export interface MatchResponse {
   matchTime: string | null;
   homeTeamId: number | null;
   awayTeamId: number | null;
+  seasonId: number | null;
+  seasonName: string | null;
+  roundNumber: number;
 }

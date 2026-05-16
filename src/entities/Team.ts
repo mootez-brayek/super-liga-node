@@ -14,6 +14,9 @@ export class Team {
   @Column({ nullable: true })
   logo!: string | null;
 
+  @Column({ default: false })
+  isArchived!: boolean;
+
   @OneToOne(() => User, (user) => user.team, { nullable: true })
   @JoinColumn({ name: 'admin_id' })
   admin!: User | null;

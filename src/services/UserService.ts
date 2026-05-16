@@ -71,9 +71,87 @@ export class UserService {
     await userRepo.save(admin);
   }
 
+  async archiveAdmin(adminId: number): Promise<void> {
+    const userRepo = this.userRepo();
+    const admin = await userRepo.findOne({ where: { userId: adminId }, relations: ['team'] });
+
+    if (!admin) {
+      throw new Error('Admin not found');
+    }
+
+    if (admin.role !== Role.ADMIN) {
+      throw new Error('User is not an admin');
+    }
+
+    admin.isActive = false;
+    await userRepo.save(admin);
+  }
+
+  async restoreAdmin(adminId: number): Promise<void> {
+    const userRepo = this.userRepo();
+    const admin = await userRepo.findOne({ where: { userId: adminId }, relations: ['team'] });
+
+    if (!admin) {
+      throw new Error('Admin not found');
+    }
+
+    if (admin.role !== Role.ADMIN) {
+      throw new Error('User is not an admin');
+    }
+
+    admin.isActive = true;
+    await userRepo.save(admin);
+  }
+
   async updateAdmin(request: UpdateAdminRequest, currentUser: CurrentUser): Promise<CreateAdminResponse> {
     const userRepo = this.userRepo();
     const admin = await userRepo.findOne({ where: { userId: currentUser.userId }, relations: ['team'] });
+
+    if (!admin) {
+      throw new Error('User not found');
+    }
+
+    if (admin.role !== Role.ADMIN) {
+      throw new Error('Only ADMIN can update profile');
+    }
+
+    if (!isBlank(request.firstName)) {
+      admin.firstName = request.firstName!.trim();
+    }
+
+    if (!isBlank(request.lastName)) {
+      admin.lastName = request.lastName!.trim();
+    }
+
+    if (!isBlank(request.email)) {
+      const nextEmail = request.email!.trim();
+      if (nextEmail !== admin.email) {
+        const exists = await userRepo.exists({ where: { email: nextEmail } });
+        if (exists) {
+          throw new Error('Email already in use');
+        }
+      }
+      admin.email = nextEmail;
+    }
+
+    if (!isBlank(request.phoneNumber)) {
+      const nextPhone = request.phoneNumber!.trim();
+      if (nextPhone !== admin.phoneNumber) {
+        const phoneExists = await userRepo.exists({ where: { phoneNumber: nextPhone } });
+        if (phoneExists) {
+          throw new Error('Phone number already used');
+        }
+      }
+      admin.phoneNumber = nextPhone;
+    }
+
+    const saved = await userRepo.save(admin);
+    return this.mapToResponse(saved);
+  }
+
+  async updateAdminById(adminId: number, request: UpdateAdminRequest): Promise<CreateAdminResponse> {
+    const userRepo = this.userRepo();
+    const admin = await userRepo.findOne({ where: { userId: adminId }, relations: ['team'] });
 
     if (!admin) {
       throw new Error('User not found');

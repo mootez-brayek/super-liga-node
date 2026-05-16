@@ -166,6 +166,24 @@ export const swaggerSpec = {
           logo: { type: 'string', nullable: true, example: 'https://example.com/logo.png' }
         }
       },
+      CreateTeamUploadRequest: {
+        type: 'object',
+        required: ['name'],
+        properties: {
+          name: { type: 'string', example: 'Super Eagles' },
+          logoFile: {
+            type: 'string',
+            format: 'binary',
+            nullable: true,
+            description: 'Optional image file for the team logo'
+          },
+          logo: {
+            type: 'string',
+            nullable: true,
+            description: 'Optional URL fallback when no file is uploaded'
+          }
+        }
+      },
       TeamResponse: {
         type: 'object',
         required: ['teamId', 'name', 'logo', 'adminName'],
@@ -190,13 +208,38 @@ export const swaggerSpec = {
           teamId: { type: 'integer', nullable: true, example: 1 }
         }
       },
+      CreatePlayerUploadRequest: {
+        type: 'object',
+        required: ['firstName', 'lastName', 'number', 'strongFoot', 'position'],
+        properties: {
+          firstName: { type: 'string', example: 'Ali' },
+          lastName: { type: 'string', example: 'Ben' },
+          number: { type: 'integer', example: 9 },
+          pictureFile: {
+            type: 'string',
+            format: 'binary',
+            nullable: true,
+            description: 'Optional image file for the player picture'
+          },
+          picture: {
+            type: 'string',
+            nullable: true,
+            description: 'Optional URL fallback when no file is uploaded'
+          },
+          strongFoot: ref('StrongFoot'),
+          birthDate: { type: 'string', nullable: true, example: '2002-06-15' },
+          position: ref('Position'),
+          teamId: { type: 'integer', nullable: true, example: 1 }
+        }
+      },
       PlayerResponse: {
         type: 'object',
-        required: ['playerId', 'fullName', 'number', 'strongFoot', 'birthDate', 'age', 'position', 'teamName'],
+        required: ['playerId', 'fullName', 'number', 'picture', 'strongFoot', 'birthDate', 'age', 'position', 'teamName'],
         properties: {
           playerId: { type: 'integer', format: 'int64' },
           fullName: { type: 'string' },
           number: { type: 'integer' },
+          picture: { type: 'string', nullable: true },
           strongFoot: ref('StrongFoot'),
           birthDate: { type: 'string', nullable: true, example: '2002-06-15' },
           age: { type: 'integer', nullable: true },
@@ -389,8 +432,8 @@ export const swaggerSpec = {
         requestBody: {
           required: true,
           content: {
-            'application/json': {
-              schema: ref('CreateTeamRequest')
+            'multipart/form-data': {
+              schema: ref('CreateTeamUploadRequest')
             }
           }
         },
@@ -416,8 +459,8 @@ export const swaggerSpec = {
         requestBody: {
           required: true,
           content: {
-            'application/json': {
-              schema: ref('CreatePlayerRequest')
+            'multipart/form-data': {
+              schema: ref('CreatePlayerUploadRequest')
             }
           }
         },
@@ -442,8 +485,8 @@ export const swaggerSpec = {
         requestBody: {
           required: true,
           content: {
-            'application/json': {
-              schema: ref('CreatePlayerRequest')
+            'multipart/form-data': {
+              schema: ref('CreatePlayerUploadRequest')
             }
           }
         },

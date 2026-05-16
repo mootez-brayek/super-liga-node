@@ -6,6 +6,7 @@ async function bootstrap() {
   const { AppDataSource } = await import('./data-source');
   const { bootstrapSuperAdmin } = await import('./bootstrap/super-admin');
   const { createApp } = await import('./app');
+  const { SeasonService } = await import('./services/SeasonService');
 
   const dbHost = process.env.DB_HOST ?? 'localhost';
   const dbPort = Number(process.env.DB_PORT ?? 3306);
@@ -18,6 +19,7 @@ async function bootstrap() {
   }
 
   await bootstrapSuperAdmin();
+  await new SeasonService().ensureActiveSeason();
 
   const app = createApp();
   const port = Number(process.env.PORT || 3000);

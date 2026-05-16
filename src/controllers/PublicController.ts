@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { MatchService } from '../services/MatchService';
 import { PlayerService } from '../services/PlayerService';
 import { StandingService } from '../services/StandingService';
+import { SeasonService } from '../services/SeasonService';
 import { TeamService } from '../services/TeamService';
 import { asyncHandler } from '../middleware/async-handler';
 import { parseIdParam } from '../utils/params';
@@ -10,7 +11,8 @@ export function createPublicRouter(
   standingService: StandingService,
   matchService: MatchService,
   teamService: TeamService,
-  playerService: PlayerService
+  playerService: PlayerService,
+  seasonService: SeasonService
 ) {
   const router = Router();
 
@@ -47,6 +49,13 @@ export function createPublicRouter(
     asyncHandler(async (req, res) => {
       const teamId = parseIdParam(req.params.teamId, 'teamId');
       res.status(200).json(await playerService.getPlayerByTeam(teamId));
+    })
+  );
+
+  router.get(
+    '/season/current',
+    asyncHandler(async (_req, res) => {
+      res.status(200).json(await seasonService.getCurrentSeason());
     })
   );
 
